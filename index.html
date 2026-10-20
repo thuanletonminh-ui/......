@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mã truy cập</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f7f9fa;
+      color: #2d3748;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Màn hình khóa siêu tối giản */
+    .lock-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .lock-card h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #4a5568;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input[type="password"], input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #a0aec0;
+    }
+
+    .btn-submit {
+      padding: 10px 16px;
+      background-color: #4a5568;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+      background-color: #2d3748;
+    }
+
+    .error-msg {
+      color: #e53e3e;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    /* Giao diện chính */
+    .main-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      padding: 6px 12px;
+      border: 1px solid #cbd5e0;
+      background: #ffffff;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #4a5568;
+      cursor: pointer;
+    }
+
+    .btn-action:hover {
+      background: #f7fafc;
+    }
+
+    /* Cards Lời chúc */
+    .cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .card-text {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: #2d3748;
+      white-space: pre-line;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+      border-top: 1px solid #f7fafc;
+      padding-top: 8px;
+    }
+
+    .btn-icon {
+      border: none;
+      background: none;
+      color: #a0aec0;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .btn-icon:hover {
+      color: #4a5568;
+    }
+
+    /* Modal Form */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .modal-content h3 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: #2d3748;
+    }
+
+    .modal-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Màn hình khóa -->
+  <div class="lock-card" id="lockScreen">
+    <h2>Mã truy cập</h2>
+    <div class="input-group">
+      <input type="password" id="passInput" placeholder="Nhập mật khẩu..." autofocus>
+      <button class="btn-submit" id="btnSubmit">Xác nhận</button>
+    </div>
+    <div class="error-msg hidden" id="errorMsg">Mật khẩu không đúng</div>
+  </div>
+
+  <!-- Giao diện chính -->
+  <div class="main-container hidden" id="mainContent">
+    <div class="header">
+      <h1>20/10</h1>
+      <div class="controls">
+        <button class="btn-action" id="btnAudio">🔊 Nhạc</button>
+        <button class="btn-action" id="btnAdd">+ Thêm</button>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- Modal Thêm/Sửa -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal-content">
+      <h3 id="modalTitle">Thêm lời chúc</h3>
+      <textarea id="wishText" rows="4" placeholder="Nhập lời chúc (chỉ xưng chúc bà)..."></textarea>
+      <div class="modal-btns">
+        <button class="btn-action" id="btnCancel">Hủy</button>
+        <button class="btn-submit" id="btnSave">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thẻ Audio liên kết trực tiếp với file nhac.mp3 -->
+  <audio id="bgMusic" loop src="nhac.mp3"></audio>
+
+  <script>
+    // Dữ liệu lời chúc mặc định (chuẩn xưng hô "Chúc bà")
+    const defaultWishes = [
+      { id: 1, text: "Chúc bà luôn vui vẻ, rực rỡ và xinh đẹp trong ngày 20/10 nhé!" },
+      { id: 2, text: "Chúc bà ngày 20/10 tràn ngập niềm vui, học tập thật tốt và luôn nở nụ cười trên môi." },
+      { id: 3, text: "Chúc bà ngày 20/10 thật ý nghĩa, nhận được nhiều quà và luôn gặp nhiều may mắn." },
+      { id: 4, text: "Chúc bà luôn tự tin, yêu đời và đạt được mọi mục tiêu trong năm học này!" }
+    ];
+
+    let wishes = JSON.parse(localStorage.getItem('class_wishes_2010')) || defaultWishes;
+    let currentEditId = null;
+
+    // Elements
+    const lockScreen = document.getElementById('lockScreen');
+    const mainContent = document.getElementById('mainContent');
+    const passInput = document.getElementById('passInput');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const errorMsg = document.getElementById('errorMsg');
+    const cardsGrid = document.getElementById('cardsGrid');
+    const bgMusic = document.getElementById('bgMusic');
+    const btnAudio = document.getElementById('btnAudio');
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const wishText = document.getElementById('wishText');
+    const btnAdd = document.getElementById('btnAdd');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSave = document.getElementById('btnSave');
+
+    // Mở khóa & Phát nhạc nhac.mp3
+    function checkPassword() {
+      if (passInput.value.trim() === '20/10') {
+        lockScreen.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        renderCards();
+
+        // Tự động phát file nhac.mp3
+        bgMusic.play().then(() => {
+          btnAudio.textContent = '🔊 Tắt nhạc';
+        }).catch((err) => {
+          console.log('Phát nhạc bị chặn hoặc chưa tìm thấy file:', err);
+          btnAudio.textContent = '🔈 Bật nhạc';
+        });
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    btnSubmit.addEventListener('click', checkPassword);
+    passInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    // Bật / Tắt nhạc
+    btnAudio.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.play();
+        btnAudio.textContent = '🔊 Tắt nhạc';
+      } else {
+        bgMusic.pause();
+        btnAudio.textContent = '🔈 Bật nhạc';
+      }
+    });
+
+    // Hiển thị danh sách card
+    function renderCards() {
+      cardsGrid.innerHTML = '';
+      wishes.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-text">${escapeHtml(item.text)}</div>
+          <div class="card-actions">
+            <button class="btn-icon" onclick="editWish(${item.id})">Sửa</button>
+            <button class="btn-icon" onclick="deleteWish(${item.id})">Xóa</button>
+          </div>
+        `;
+        cardsGrid.appendChild(card);
+      });
+      localStorage.setItem('class_wishes_2010', JSON.stringify(wishes));
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Modal Operations
+    btnAdd.addEventListener('click', () => {
+      currentEditId = null;
+      modalTitle.textContent = 'Thêm lời chúc';
+      wishText.value = 'Chúc bà ';
+      modalOverlay.classList.remove('hidden');
+      wishText.focus();
+    });
+
+    btnCancel.addEventListener('click', () => {
+      modalOverlay.classList.add('hidden');
+    });
+
+    btnSave.addEventListener('click', () => {
+      const text = wishText.value.trim();
+      if (!text) return;
+
+      if (currentEditId) {
+        wishes = wishes.map(w => w.id === currentEditId ? { ...w, text } : w);
+      } else {
+        wishes.push({ id: Date.now(), text });
+      }
+
+      renderCards();
+      modalOverlay.classList.add('hidden');
+    });
+
+    window.editWish = function(id) {
+      const target = wishes.find(w => w.id === id);
+      if (!target) return;
+      currentEditId = id;
+      modalTitle.textContent = 'Sửa lời chúc';
+      wishText.value = target.text;
+      modalOverlay.classList.remove('hidden');
+      wishText.focus();
+    };
+
+    window.deleteWish = function(id) {
+      if (confirm('Bạn có muốn xóa lời chúc này không?')) {
+        wishes = wishes.filter(w => w.id !== id);
+        renderCards();
+      }
+    };
+  </script>
+</body>
+</html>
